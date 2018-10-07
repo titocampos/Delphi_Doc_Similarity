@@ -30,14 +30,9 @@ type
     FTextToCompareNumTokens,
     FTokensIntersections: Integer;
 
-    function sufixRemove(var Word: String; const Sufix: String; const minCharSuport: SmallInt): Boolean;
-    function steemingWord(const Word: String): String;
-    function pluralReduction(var Word: String): Boolean;
-    function feminineReduction(var Word: String): Boolean;
-    function augmentativeReduction(var Word: String): Boolean;
     function preProcessText(const Text: String): String;
 
-    function L2_normalize(Lst: TTokenLst): SmallInt;
+    function computeDotProduct(Lst: TTokenLst): Double;
     procedure computeCorrelation(const BaseText, TextToCompare: String);
 
     procedure tokenize(const Text: String; Lst: TTokenLst);
@@ -63,18 +58,15 @@ implementation
 { TAnalisador }
 
 
-function TComparer.L2_normalize(Lst: TTokenLst): SmallInt;
+function TComparer.computeDotProduct(Lst: TTokenLst): Double;
 var
   Token: TToken;
-  Total: Double;
 begin
-  Total := 0;
+  Result := 0;
   for Token in Lst.Values do
   begin
-    Total := Total + Power(Token.OccurrNumber,2);
+    Result := Result + Power(Token.OccurrNumber, 2);
   end;
-
-  Result := Trunc(Sqrt(Total));
 end;
 
 
@@ -83,8 +75,7 @@ var
   TokenA, TokenB: TToken;
   LstA, LstB,
   SmallerLst, GreatherLst: TTokenLst;
-  ValueA, ValueB,
-  TotalOccurNumberA_Norm, TotalOccurNumberB_Norm: Double;
+  DotProduct_LstA, DotProduct_LstB: Double;
 
 begin
   // Initialize vars...
@@ -116,9 +107,9 @@ begin
       GreatherLst := LstA;
     end;
 
-    // Extract total tokens occurrence number, normalized...
-    TotalOccurNumberA_Norm := L2_normalize(LstA);
-    TotalOccurNumberB_Norm := L2_normalize(LstB);
+    // Compute dot product for each token list
+    DotProduct_LstA := computeDotProduct(LstA);
+    DotProduct_LstB := computeDotProduct(LstB);
 
     FTokensIntersections := 0;
 
@@ -129,21 +120,18 @@ begin
       if FStopWords.ContainsKey(TokenA.Name) then
         Continue;
 
-      // Count TF... intersection between two lists...
+      // Calculate vector's distance by cosine method
       if GreatherLst.TryGetValue(TokenA.Name, TokenB) then
       begin
-        ValueA := (TokenA.OccurrNumber / TotalOccurNumberA_Norm);
-        ValueB := (TokenB.OccurrNumber / TotalOccurNumberB_Norm);
-        FCorrelationValue := FCorrelationValue + (ValueA * ValueB);
+        FCorrelationValue := FCorrelationValue + (TokenA.OccurrNumber * TokenB.OccurrNumber);
         Inc(FTokensIntersections);
       end;
     end;
 
-    FCorrelationValue   := RoundTo(FCorrelationValue,-2);
+    FCorrelationValue   := FCorrelationValue / (Sqrt(DotProduct_LstA) * Sqrt(DotProduct_LstB));
+    FCorrelationValue   := RoundTo(FCorrelationValue, -4);
     FCorrelationPercent := (FCorrelationValue * 100);
 
-    if (FCorrelationPercent > 100) then
-      FCorrelationPercent := 100;
 
   finally
     LstA.Free;
@@ -226,10 +214,6 @@ end;
 
 
 
-function TComparer.feminineReduction(var Word: String): Boolean;
-begin
-  Result := sufixRemove(Word, 'a', 4);
-end;
 
 procedure TComparer.tokenize(const Text: String; Lst: TTokenLst);
 var
@@ -252,8 +236,6 @@ begin
     if FStopWords.ContainsKey(BaseToken) then
       Continue;
 
-    BaseToken := steemingWord(BaseToken);
-
     if (not Lst.TryGetValue(BaseToken, NewToken)) then
     begin
       NewToken      := TToken.Create;
@@ -268,16 +250,6 @@ begin
   end;
 end;
 
-
-function TComparer.augmentativeReduction(var Word: String): Boolean;
-begin
-  Result := sufixRemove(Word, 'ao', 4);
-
-  if Result then
-    Result := sufixRemove(Word, 'ona', 4)
-  else
-    Result := sufixRemove(Word, 'inho', 4);
-end;
 
 function TComparer.checkCompatibility(const BaseText,CompareText: String): TCompabilityResult;
 begin
@@ -303,10 +275,6 @@ begin
     Result := CompVeryHigh;
 end;
 
-function TComparer.pluralReduction(var Word: String): Boolean;
-begin
-  Result := sufixRemove(Word, 's', 4);
-end;
 
 function TComparer.preProcessText(const Text: String): String;
 begin
@@ -319,35 +287,9 @@ begin
 end;
 
 
-function TComparer.steemingWord(const Word: String): String;
-begin
-  Result := Word;
 
-  if (not pluralReduction(Result)) then
-    if (not feminineReduction(Result)) then
-      augmentativeReduction(Result);
-end;
 
-function TComparer.sufixRemove(var Word: String; const Sufix: String; const minCharSuport: SmallInt): Boolean;
-var
-  idx,
-  WordSize, SfxSize: SmallInt;
-  TempWord: String;
-begin
-  TempWord := Word;
-  SfxSize  := Length(Sufix);
-  WordSize := Length(TempWord);
-  idx      := Succ(WordSize - SfxSize);
 
-  Result := (Copy(TempWord, idx, SfxSize) = Sufix);
-  if Result then
-  begin
-   TempWord := Copy(TempWord, 0, Pred(idx));
-   Result := Length(TempWord) <= minCharSuport;
-   if Result then
-     Word := TempWord;
-  end;
-end;
 
 end.
 
