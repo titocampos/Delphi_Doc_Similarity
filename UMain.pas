@@ -60,12 +60,8 @@ var
   Memo: TMemo;
   Panel: TPanel;
   Tab: TTabSheet;
-  Score: Double;
   Status: String;
 begin
-  Score := 0;
-
-
   Series1.Clear;
 
   for i := 1 to 5 do
@@ -108,8 +104,8 @@ begin
     end;
 
     Panel.Caption := 'Similarity measure: ' + FloatToStr(Comparer.CorrelationValue) + sLineBreak +
-                     '.  Base text number of words: ' + IntToStr(Comparer.BaseTextNumWords) + sLineBreak +
-                     '.  Text to compare number of words: ' + IntToStr(Comparer.TextToCompareNumWords);
+                     '.  Base text number of words: ' + IntToStr(Comparer.BaseTextNumTokens) + sLineBreak +
+                     '.  Text to compare number of words: ' + IntToStr(Comparer.TextToCompareNumTokens);
 
     // Plotting data...
     Series1.AddY(Comparer.CorrelationValue, 'Text ' + IntToStr(i) + sLineBreak + Status);
@@ -141,9 +137,6 @@ begin
   end;
 
   Pg.ActivePageIndex := 0;
-
-
-
 end;
 
 end.

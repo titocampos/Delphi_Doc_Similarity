@@ -3,7 +3,7 @@ program TextComparer;
 uses
   Vcl.Forms,
   UMain in 'UMain.pas' {FrmMain},
-  UWord in 'UWord.pas',
+  UToken in 'UToken.pas',
   UComparer in 'UComparer.pas';
 
 {$R *.res}
