@@ -1,5 +1,5 @@
 # Delphi_Doc_Similarity
-An example of a tool that compute similarity between documents using text mining technique, made using Delphi 10.2. The measure used for this is a cosine distance method.
+An example of a tool that compute similarity between documents using text mining technique, made using Delphi 10.2. The measure used for this is a cosine distance method. This is a unsupervised learning from Machine Learning field.
 
 Enjoy it!
 
