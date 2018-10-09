@@ -32,7 +32,7 @@ type
 
     function preProcessText(const Text: String): String;
 
-    function computeDotProduct(Lst: TTokenLst): Double;
+    function computeInnerProduct(Lst: TTokenLst): Double;
     procedure computeCorrelation(const BaseText, TextToCompare: String);
 
     procedure tokenize(const Text: String; Lst: TTokenLst);
@@ -58,7 +58,7 @@ implementation
 { TAnalisador }
 
 
-function TComparer.computeDotProduct(Lst: TTokenLst): Double;
+function TComparer.computeInnerProduct(Lst: TTokenLst): Double;
 var
   Token: TToken;
 begin
@@ -108,8 +108,8 @@ begin
     end;
 
     // Compute dot product for each token list
-    DotProduct_LstA := computeDotProduct(LstA);
-    DotProduct_LstB := computeDotProduct(LstB);
+    DotProduct_LstA := computeInnerProduct(LstA);
+    DotProduct_LstB := computeInnerProduct(LstB);
 
     FTokensIntersections := 0;
 
