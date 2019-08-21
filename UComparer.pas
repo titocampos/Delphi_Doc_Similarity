@@ -99,7 +99,7 @@ begin
     tokenize(BaseText,      LstA);
     tokenize(TextToCompare, LstB);
 
-    // Count number of tokens
+    // Count number of tokens, just for info...
     FBaseTextNumTokens      := LstA.Count;
     FTextToCompareNumTokens := LstB.Count;
 
@@ -119,6 +119,7 @@ begin
     Inner_Product_LstA := computeInnerProduct(LstA);
     Inner_Product_LstB := computeInnerProduct(LstB);
 
+    // For info, only...
     FTokensIntersections := 0;
 
     // Start the iteration by less list count...
@@ -132,6 +133,8 @@ begin
       if GreatherLst.TryGetValue(TokenA.Name, TokenB) then
       begin
         FCorrelationValue := FCorrelationValue + (TokenA.OccurrNumber * TokenB.OccurrNumber);
+
+        // For info, only...
         Inc(FTokensIntersections);
       end;
     end;
