@@ -1,4 +1,4 @@
-unit UComparer;
+﻿unit UComparer;
 //
 // Doc Similarity
 // Author: Rodolpho Nascimento
@@ -83,7 +83,7 @@ var
   TokenA, TokenB: TToken;
   LstA, LstB,
   SmallerLst, GreatherLst: TTokenLst;
-  DotProduct_LstA, DotProduct_LstB: Double;
+  Inner_Product_LstA, Inner_Product_LstB: Double;
 
 begin
   // Initialize vars...
@@ -116,8 +116,8 @@ begin
     end;
 
     // Compute inner product for each token list
-    DotProduct_LstA := computeInnerProduct(LstA);
-    DotProduct_LstB := computeInnerProduct(LstB);
+    Inner_Product_LstA := computeInnerProduct(LstA);
+    Inner_Product_LstB := computeInnerProduct(LstB);
 
     FTokensIntersections := 0;
 
@@ -136,7 +136,7 @@ begin
       end;
     end;
 
-    FCorrelationValue   := FCorrelationValue / (Sqrt(DotProduct_LstA) * Sqrt(DotProduct_LstB));
+    FCorrelationValue   := FCorrelationValue / (Sqrt(Inner_Product_LstA) * Sqrt(Inner_Product_LstB));
     FCorrelationValue   := RoundTo(FCorrelationValue, -4);
     FCorrelationPercent := (FCorrelationValue * 100);
 
