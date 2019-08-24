@@ -41,7 +41,7 @@ type
     function preProcessText(const Text: String): String;
 
     function computeInnerProduct(Lst: TTokenLst): Double;
-    procedure computeCorrelation(const BaseText, TextToCompare: String);
+    procedure computeCorrelation(BaseText, TextToCompare: String);
 
     procedure tokenize(const Text: String; Lst: TTokenLst);
     procedure loadStopTokens;
@@ -78,7 +78,7 @@ begin
 end;
 
 
-procedure TComparer.computeCorrelation(const BaseText, TextToCompare: String);
+procedure TComparer.computeCorrelation(BaseText, TextToCompare: String);
 var
   TokenA, TokenB: TToken;
   LstA, LstB,
@@ -95,9 +95,15 @@ begin
     LstB   := TTokenLst.Create([doOwnsValues]);
     FCorrelationValue := 0;
 
-    // The tokenizing process...
+    // Step 1 - Preprocess...
+    BaseText      := preProcessText(BaseText);
+    TextToCompare := preProcessText(TextToCompare);
+
+    // Step 2 - The tokenizing process...
+    // BagOfWords (BOW) model
     tokenize(BaseText,      LstA);
     tokenize(TextToCompare, LstB);
+
 
     // Count number of tokens, just for info...
     FBaseTextNumTokens      := LstA.Count;
@@ -115,21 +121,17 @@ begin
       GreatherLst := LstA;
     end;
 
-    // Compute inner product for each token list
+    // Step 3.1 - Compute inner product for each token list
     Inner_Product_LstA := computeInnerProduct(LstA);
     Inner_Product_LstB := computeInnerProduct(LstB);
 
     // For info, only...
     FTokensIntersections := 0;
 
-    // Start the iteration by less list count...
+    // Step 3.2 - Start the iteration by less list count...
     for TokenA in SmallerLst.Values do
     begin
-      // Discart stop-words
-      if FStopWords.ContainsKey(TokenA.Name) then
-        Continue;
-
-      // Calculate vector's distance by cosine method
+      // 3.3 - Calculate correlation value
       if GreatherLst.TryGetValue(TokenA.Name, TokenB) then
       begin
         FCorrelationValue := FCorrelationValue + (TokenA.OccurrNumber * TokenB.OccurrNumber);
@@ -139,6 +141,7 @@ begin
       end;
     end;
 
+    // Step 3.4 - Calculate vector's distance by cosine method
     FCorrelationValue   := FCorrelationValue / (Sqrt(Inner_Product_LstA) * Sqrt(Inner_Product_LstB));
     FCorrelationValue   := RoundTo(FCorrelationValue, -4);
     FCorrelationPercent := (FCorrelationValue * 100);
@@ -233,8 +236,7 @@ var
 begin
   Lst.Clear;
 
-  // Preprocessing text...
-  BaseText := preProcessText(Text);
+  BaseText := Text;
 
   // Vectorizing text
   for TokenName in SplitString(BaseText,' ') do
