@@ -121,17 +121,13 @@ begin
       GreatherLst := LstA;
     end;
 
-    // Step 3.1 - Compute inner product for each token list
-    Inner_Product_LstA := computeInnerProduct(LstA);
-    Inner_Product_LstB := computeInnerProduct(LstB);
-
     // For info, only...
     FTokensIntersections := 0;
 
-    // Step 3.2 - Start the iteration by less list count...
+    // Step 3.1 - Start the iteration by less list count...
     for TokenA in SmallerLst.Values do
     begin
-      // 3.3 - Calculate correlation value
+      // 3.2 - Calculate correlation value
       if GreatherLst.TryGetValue(TokenA.Name, TokenB) then
       begin
         FCorrelationValue := FCorrelationValue + (TokenA.OccurrNumber * TokenB.OccurrNumber);
@@ -141,7 +137,11 @@ begin
       end;
     end;
 
-    // Step 3.4 - Calculate vector's distance by cosine method
+    // Step 3.3 - Calculate vector's distance by cosine method
+    // Compute inner product for each token list
+    Inner_Product_LstA := computeInnerProduct(LstA);
+    Inner_Product_LstB := computeInnerProduct(LstB);
+
     FCorrelationValue   := FCorrelationValue / (Sqrt(Inner_Product_LstA) * Sqrt(Inner_Product_LstB));
     FCorrelationValue   := RoundTo(FCorrelationValue, -4);
     FCorrelationPercent := (FCorrelationValue * 100);
