@@ -37,6 +37,7 @@ type
     FBaseTextNumTokens,
     FTextToCompareNumTokens,
     FTokensIntersections: Integer;
+    FCorrelationWords: String;
 
     function preProcessText(const Text: String): String;
 
@@ -45,6 +46,7 @@ type
 
     procedure tokenize(const Text: String; Lst: TTokenLst);
     procedure loadStopTokens;
+    procedure SetCorrelationWords(const Value: String);
 
   public
 
@@ -56,6 +58,7 @@ type
     property TokensIntersections: Integer read FTokensIntersections;
     property BaseTextNumTokens: integer read FBaseTextNumTokens;
     property TextToCompareNumTokens: integer read FTextToCompareNumTokens;
+    property CorrelationWords: String read FCorrelationWords write SetCorrelationWords;
 
     function checkCompatibility(const BaseText, CompareText: String): TCompabilityResult;
   end;
@@ -134,6 +137,7 @@ begin
 
         // For info, only...
         Inc(FTokensIntersections);
+        FCorrelationWords := FCorrelationWords + '  ' + TokenA.Name;
       end;
     end;
 
@@ -142,9 +146,17 @@ begin
     Inner_Product_LstA := computeInnerProduct(LstA);
     Inner_Product_LstB := computeInnerProduct(LstB);
 
-    FCorrelationValue   := FCorrelationValue / (Sqrt(Inner_Product_LstA) * Sqrt(Inner_Product_LstB));
-    FCorrelationValue   := RoundTo(FCorrelationValue, -4);
-    FCorrelationPercent := (FCorrelationValue * 100);
+    if (Inner_Product_LstA = 0) or (Inner_Product_LstB = 0) then
+    begin
+      FCorrelationValue   := 0;
+      FCorrelationPercent := 0;
+    end
+    else
+    begin
+      FCorrelationValue   := FCorrelationValue / (Sqrt(Inner_Product_LstA) * Sqrt(Inner_Product_LstB));
+      FCorrelationValue   := RoundTo(FCorrelationValue, -4);
+      FCorrelationPercent := (FCorrelationValue * 100);
+    end;
 
 
   finally
@@ -192,7 +204,7 @@ const
  'tinha', 't�nhamos', 'tinham', 'tive', 'teve', 'tivemos',
  'tiveram', 'tivera', 'tiv�ramos', 'tenha', 'tenhamos', 'tenham',
  'tivesse', 'tiv�ssemos', 'tivessem', 'tiver', 'tivermos', 'tiverem',
- 'terei', 'ter�', 'teremos', 'ter�o', 'teria', 'ter�amos',
+ 'terei', 'terá', 'teremos', 'terão', 'teria', 'ter�amos',
  'teriam');
 
 var
@@ -264,9 +276,13 @@ begin
 end;
 
 
-function TComparer.checkCompatibility(const BaseText,CompareText: String): TCompabilityResult;
+function TComparer.checkCompatibility(const BaseText, CompareText: String): TCompabilityResult;
 begin
   // Compute correlation between both texts
+  FCorrelationValue   := 0;
+  FCorrelationWords   := '';
+  FCorrelationPercent := 0;
+
   computeCorrelation(BaseText, CompareText);
 
   // Define the class type
@@ -293,6 +309,8 @@ function TComparer.preProcessText(const Text: String): String;
 begin
   Result := Text;
   Result := StringReplace(Result,'.',' ',[rfReplaceAll,rfIgnoreCase]);
+  Result := StringReplace(Result,'(',' ',[rfReplaceAll,rfIgnoreCase]);
+  Result := StringReplace(Result,')',' ',[rfReplaceAll,rfIgnoreCase]);
   Result := StringReplace(Result,',',' ',[rfReplaceAll,rfIgnoreCase]);
   Result := StringReplace(Result,'~',' ',[rfReplaceAll,rfIgnoreCase]);
   Result := StringReplace(Result,sLineBreak,' ',[rfReplaceAll,rfIgnoreCase]);
@@ -303,6 +321,11 @@ end;
 
 
 
+
+procedure TComparer.SetCorrelationWords(const Value: String);
+begin
+  FCorrelationWords := Value;
+end;
 
 end.
 

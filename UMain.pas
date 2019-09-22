@@ -6,7 +6,7 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.StdCtrls, Vcl.ComCtrls, UComparer,
   VclTee.TeeGDIPlus, VCLTee.TeEngine, VCLTee.TeeProcs, VCLTee.Chart,
-  VCLTee.Series;
+  VCLTee.Series, System.ImageList, Vcl.ImgList, Vcl.Buttons;
 
 type
   TFrmMain = class(TForm)
@@ -35,9 +35,13 @@ type
     TbsText6: TTabSheet;
     Chart: TChart;
     Series1: TBarSeries;
+    ImageList: TImageList;
+    SpeedButton1: TSpeedButton;
+    FileOpenDialog: TFileOpenDialog;
     procedure FormCreate(Sender: TObject);
     procedure FormDestroy(Sender: TObject);
     procedure BtCheckClick(Sender: TObject);
+    procedure SpeedButton1Click(Sender: TObject);
   private
     { Private declarations }
     Comparer: TComparer;
@@ -61,6 +65,7 @@ var
   Panel: TPanel;
   Tab: TTabSheet;
   Status: String;
+  TextoEstatisticas: String;
 begin
   Series1.Clear;
 
@@ -103,9 +108,10 @@ begin
                     end;
     end;
 
-    Panel.Caption := 'Similarity measure: ' + FloatToStr(Comparer.CorrelationValue) + sLineBreak +
-                     '.  Base text number of words: ' + IntToStr(Comparer.BaseTextNumTokens) + sLineBreak +
-                     '.  Text to compare number of words: ' + IntToStr(Comparer.TextToCompareNumTokens);
+    // Statistics
+    TextoEstatisticas := 'Correlation words: ' + Comparer.CorrelationWords;
+    Panel.Caption := TextoEstatisticas;
+
 
     // Plotting data...
     Series1.AddY(Comparer.CorrelationValue, 'Text ' + IntToStr(i) + sLineBreak + Status);
@@ -137,6 +143,29 @@ begin
   end;
 
   Pg.ActivePageIndex := 0;
+end;
+
+procedure TFrmMain.SpeedButton1Click(Sender: TObject);
+var
+  CaminhoArquivo: String;
+  i: Integer;
+begin
+  if FileOpenDialog.Execute then
+  begin
+    for i := 0 to 5 do
+    begin
+      CaminhoArquivo := FileOpenDialog.FileName + '\Text' + IntToStr(i) + '.txt';
+
+      case i of
+        0: mmBaseText.Lines.LoadFromFile(CaminhoArquivo);
+        1: mmText1.Lines.LoadFromFile(CaminhoArquivo);
+        2: mmText2.Lines.LoadFromFile(CaminhoArquivo);
+        3: mmText3.Lines.LoadFromFile(CaminhoArquivo);
+        4: mmText4.Lines.LoadFromFile(CaminhoArquivo);
+        5: mmText5.Lines.LoadFromFile(CaminhoArquivo);
+      end;
+    end;
+  end;
 end;
 
 end.
