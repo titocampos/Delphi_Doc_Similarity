@@ -313,6 +313,8 @@ begin
   Result := StringReplace(Result,')',' ',[rfReplaceAll,rfIgnoreCase]);
   Result := StringReplace(Result,',',' ',[rfReplaceAll,rfIgnoreCase]);
   Result := StringReplace(Result,'~',' ',[rfReplaceAll,rfIgnoreCase]);
+  Result := StringReplace(Result,'!',' !',[rfReplaceAll,rfIgnoreCase]);
+  Result := StringReplace(Result,'?',' ?',[rfReplaceAll,rfIgnoreCase]);
   Result := StringReplace(Result,sLineBreak,' ',[rfReplaceAll,rfIgnoreCase]);
   Result := AnsiLowerCase(Result);
 end;
