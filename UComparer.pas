@@ -84,53 +84,53 @@ end;
 procedure TComparer.computeCorrelation(BaseText, TextToCompare: String);
 var
   TokenA, TokenB: TToken;
-  LstA, LstB,
+  Lst_BOW_A, Lst_BOW_B,
   SmallerLst, GreatherLst: TTokenLst;
   Inner_Product_LstA, Inner_Product_LstB: Double;
 
 begin
   // Initialize vars...
-  LstA := nil;
-  LstB := nil;
+  Lst_BOW_A := nil;
+  Lst_BOW_B := nil;
 
   try
-    LstA   := TTokenLst.Create([doOwnsValues]);
-    LstB   := TTokenLst.Create([doOwnsValues]);
+    Lst_BOW_A   := TTokenLst.Create([doOwnsValues]);
+    Lst_BOW_B   := TTokenLst.Create([doOwnsValues]);
     FCorrelationValue := 0;
 
-    // Step 1 - Preprocess...
+    // Step 2 - Preprocess...
     BaseText      := preProcessText(BaseText);
     TextToCompare := preProcessText(TextToCompare);
 
-    // Step 2 - The tokenizing process...
+    // Step 3 - The tokenizing process...
     // BagOfWords (BOW) model
-    tokenize(BaseText,      LstA);
-    tokenize(TextToCompare, LstB);
+    tokenize(BaseText,      Lst_BOW_A);
+    tokenize(TextToCompare, Lst_BOW_B);
 
 
     // Count number of tokens, just for info...
-    FBaseTextNumTokens      := LstA.Count;
-    FTextToCompareNumTokens := LstB.Count;
+    FBaseTextNumTokens      := Lst_BOW_A.Count;
+    FTextToCompareNumTokens := Lst_BOW_B.Count;
 
     // Start by less count list, to perform process
-    if (LstA.Count <= LstB.Count) then
+    if (Lst_BOW_A.Count <= Lst_BOW_B.Count) then
     begin
-      SmallerLst  := LstA;
-      GreatherLst := LstB;
+      SmallerLst  := Lst_BOW_A;
+      GreatherLst := Lst_BOW_B;
     end
     else
     begin
-      SmallerLst  := LstB;
-      GreatherLst := LstA;
+      SmallerLst  := Lst_BOW_B;
+      GreatherLst := Lst_BOW_A;
     end;
 
     // For info, only...
     FTokensIntersections := 0;
 
-    // Step 3.1 - Start the iteration by less list count...
+    // Step 4.1 - Start the iteration by less list count...
     for TokenA in SmallerLst.Values do
     begin
-      // 3.2 - Calculate correlation value
+      // 4.2 - Calculate correlation value
       if GreatherLst.TryGetValue(TokenA.Name, TokenB) then
       begin
         FCorrelationValue := FCorrelationValue + (TokenA.OccurrNumber * TokenB.OccurrNumber);
@@ -141,11 +141,13 @@ begin
       end;
     end;
 
-    // Step 3.3 - Calculate vector's distance by cosine method
+    // Step 4.3 - Calculate vector's distance by cosine method
     // Compute inner product for each token list
-    Inner_Product_LstA := computeInnerProduct(LstA);
-    Inner_Product_LstB := computeInnerProduct(LstB);
+    Inner_Product_LstA := computeInnerProduct(Lst_BOW_A);
+    Inner_Product_LstB := computeInnerProduct(Lst_BOW_B);
 
+
+    // Step 5 - Results
     if (Inner_Product_LstA = 0) or (Inner_Product_LstB = 0) then
     begin
       FCorrelationValue   := 0;
@@ -160,8 +162,8 @@ begin
 
 
   finally
-    LstA.Free;
-    LstB.Free;
+    Lst_BOW_A.Free;
+    Lst_BOW_B.Free;
   end;
 end;
 
